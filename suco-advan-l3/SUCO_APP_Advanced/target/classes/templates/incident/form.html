@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::section})}">
+<title>Tạo sự cố</title>
+<section>
+    <h3 class="mb-4">Tạo sự cố mới</h3>
+    <div class="card shadow-sm"><div class="card-body">
+        <form method="post" th:action="@{/incidents/create}">
+            <div class="mb-3">
+                <label class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                <input type="text" name="tieuDe" class="form-control" required maxlength="200"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mô tả</label>
+                <textarea name="moTa" class="form-control" rows="3" maxlength="2000"></textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Dự án</label>
+                    <select name="maDA" class="form-select">
+                        <option value="">-- Không chọn --</option>
+                        <option th:each="d : ${duAns}" th:value="${d.maDA}" th:text="${d.tenDA}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Công việc liên quan</label>
+                    <select name="maCV" class="form-select">
+                        <option value="">-- Không chọn --</option>
+                        <option th:each="c : ${congViecs}" th:value="${c.maCV}"
+                                th:text="${c.tenCV + ' (' + c.duAn.tenDA + ')'}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Mức độ</label>
+                    <select name="mucDo" class="form-select">
+                        <option th:each="m : ${mucDos}" th:value="${m}" th:text="${m}"
+                                th:selected="${m == 'TRUNG_BINH'}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Hạn xử lý (để trống = +3 ngày)</label>
+                <input type="datetime-local" name="hanXuLy" class="form-control"/>
+            </div>
+            <button type="submit" class="btn btn-primary">Ghi nhận sự cố</button>
+            <a th:href="@{/incidents}" class="btn btn-outline-secondary">Hủy</a>
+        </form>
+    </div></div>
+</section>
+</html>

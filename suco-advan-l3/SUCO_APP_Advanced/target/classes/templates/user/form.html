@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::section})}">
+<title th:text="${user != null} ? 'Sửa user' : 'Thêm user'">User form</title>
+<section>
+    <h3 class="mb-4" th:text="${user != null} ? 'Sửa user' : 'Thêm user mới'"></h3>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post"
+                  th:action="${user != null} ? @{/users/{id}/edit(id=${user.maND})} : @{/users/create}">
+                <div class="mb-3">
+                    <label class="form-label">Họ tên</label>
+                    <input type="text" name="hoTen" class="form-control" required
+                           th:value="${user?.hoTen}"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" required
+                           th:value="${user?.email}"/>
+                </div>
+                <div class="mb-3" th:if="${user == null}">
+                    <label class="form-label">Mật khẩu</label>
+                    <input type="password" name="matKhau" class="form-control" required minlength="4"/>
+                </div>
+                <div class="mb-3" th:if="${user != null}">
+                    <label class="form-label">Mật khẩu mới (để trống nếu không đổi)</label>
+                    <input type="password" name="matKhauMoi" class="form-control" minlength="4"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Vai trò</label>
+                    <select name="vaiTro" class="form-select">
+                        <option value="USER" th:selected="${user == null or user.vaiTro == 'USER'}">USER</option>
+                        <option value="ADMIN" th:selected="${user != null and user.vaiTro == 'ADMIN'}">ADMIN</option>
+                    </select>
+                </div>
+                <div class="mb-3" th:if="${user != null}">
+                    <label class="form-label">Trạng thái</label>
+                    <select name="trangThai" class="form-select">
+                        <option value="1" th:selected="${user.trangThai == 1}">Active</option>
+                        <option value="0" th:selected="${user.trangThai == 0}">Khóa</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Lưu</button>
+                <a th:href="@{/users}" class="btn btn-outline-secondary">Hủy</a>
+            </form>
+        </div>
+    </div>
+</section>
+</html>

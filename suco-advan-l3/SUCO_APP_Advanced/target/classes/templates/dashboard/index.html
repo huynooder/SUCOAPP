@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::section})}">
+<title>Dashboard - Smart Campus</title>
+<section>
+    <h3 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard</h3>
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-bg-primary"><div class="card-body"><h6>Tổng sự cố</h6><h2 th:text="${total}">0</h2></div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-danger"><div class="card-body"><h6>Quá hạn</h6><h2 th:text="${quaHan}">0</h2></div></div>
+        </div>
+        <div class="col-md-3" th:each="e : ${byStatus}">
+            <div class="card border-0 shadow-sm"><div class="card-body">
+                <h6 class="text-muted" th:text="${e.key}"></h6><h2 th:text="${e.value}">0</h2>
+            </div></div>
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">Theo trạng thái</div>
+                <div class="card-body"><canvas id="chartStatus" height="200"></canvas></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">Theo dự án</div>
+                <div class="card-body"><canvas id="chartProject" height="200"></canvas></div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between">
+            <span>Sự cố gần đây</span>
+            <a th:href="@{/incidents}" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Mã</th><th>Tiêu đề</th><th>Dự án</th><th>Trạng thái</th><th>Hạn XL</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="s : ${recent}" th:classappend="${s.quaHan} ? 'overdue'">
+                    <td th:text="${s.maSC}"></td>
+                    <td th:text="${s.tieuDe}"></td>
+                    <td th:text="${s.duAn?.tenDA} ?: '—'"></td>
+                    <td><span class="badge" th:classappend="'badge-' + ${s.trangThai}" th:text="${s.trangThai}"></span>
+                        <span th:if="${s.quaHan}" class="badge bg-danger">Quá hạn</span></td>
+                    <td th:text="${s.hanXuLy != null ? #temporals.format(s.hanXuLy, 'dd/MM/yyyy HH:mm') : ''}"></td>
+                    <td><a th:href="@{/incidents/{id}(id=${s.maSC})}" class="btn btn-sm btn-outline-secondary">Chi tiết</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        const statusData = /*[[${byStatus}]]*/ {};
+        const projectData = /*[[${byProject}]]*/ {};
+        new Chart(document.getElementById('chartStatus'), {
+            type: 'doughnut',
+            data: { labels: Object.keys(statusData), datasets: [{ data: Object.values(statusData), backgroundColor: ['#3b82f6','#f59e0b','#10b981','#6b7280'] }] }
+        });
+        new Chart(document.getElementById('chartProject'), {
+            type: 'bar',
+            data: { labels: Object.keys(projectData), datasets: [{ label: 'Số sự cố', data: Object.values(projectData), backgroundColor: '#6366f1' }] },
+            options: { scales: { y: { beginAtZero: true } } }
+        });
+    </script>
+</section>
+</html>

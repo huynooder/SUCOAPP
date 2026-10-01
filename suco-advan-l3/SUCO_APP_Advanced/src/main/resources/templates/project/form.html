@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::section})}">
+<title th:text="${project != null} ? 'Sửa dự án' : 'Thêm dự án'">Dự án</title>
+<section>
+    <h3 class="mb-4" th:text="${project != null} ? 'Sửa dự án' : 'Thêm dự án mới'"></h3>
+    <div class="card shadow-sm"><div class="card-body">
+        <form method="post" th:action="${project != null} ? @{/projects/{id}/edit(id=${project.maDA})} : @{/projects/create}">
+            <div class="mb-3">
+                <label class="form-label">Tên dự án *</label>
+                <input type="text" name="tenDA" class="form-control" required th:value="${project?.tenDA}"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mô tả</label>
+                <textarea name="moTa" class="form-control" rows="3" th:text="${project?.moTa}"></textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Ngày bắt đầu</label>
+                    <input type="date" name="ngayBatDau" class="form-control"
+                           th:value="${project?.ngayBatDau}"/>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Ngày kết thúc</label>
+                    <input type="date" name="ngayKetThuc" class="form-control"
+                           th:value="${project?.ngayKetThuc}"/>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select name="trangThai" class="form-select">
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
+                                th:selected="${project != null and project.trangThai == s}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Người quản lý</label>
+                <select name="maQuanLy" class="form-select">
+                    <option value="">-- Không chọn --</option>
+                    <option th:each="u : ${users}" th:value="${u.maND}" th:text="${u.hoTen}"
+                            th:selected="${project != null and project.quanLy != null and project.quanLy.maND == u.maND}"></option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Lưu</button>
+            <a th:href="@{/projects}" class="btn btn-outline-secondary">Hủy</a>
+        </form>
+    </div></div>
+</section>
+</html>

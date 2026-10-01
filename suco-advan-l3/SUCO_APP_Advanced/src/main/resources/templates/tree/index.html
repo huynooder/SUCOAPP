@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::section})}">
+<head><title>Cây quan hệ – Smart Campus</title></head>
+<body>
+<section>
+    <div class="mb-4">
+        <h3 class="mb-1"><i class="bi bi-diagram-3 text-success"></i> Cây quan hệ sự cố</h3>
+        <p class="text-muted mb-0 small">Dự án → Danh mục → Sự cố · Tổng <span th:text="${total}">0</span> sự cố</p>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card card-modern">
+                <div class="card-header">Theo dự án</div>
+                <div class="card-body">
+                    <canvas id="chartProject" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card card-modern">
+                <div class="card-header">Theo danh mục</div>
+                <div class="card-body">
+                    <canvas id="chartCat" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-modern">
+        <div class="card-header"><i class="bi bi-diagram-2"></i> Cây phân cấp</div>
+        <div class="card-body">
+            <ul class="tree-root" th:if="${!tree.isEmpty()}">
+                <li th:each="proj : ${tree}">
+                    <div class="tree-node project">
+                        <i class="bi bi-folder-fill"></i>
+                        <span th:text="${proj.key}">Dự án</span>
+                    </div>
+                    <ul>
+                        <li th:each="cat : ${proj.value}">
+                            <div class="tree-node category">
+                                <i class="bi bi-tag-fill"></i>
+                                <span th:text="${cat.key}">Danh mục</span>
+                                <span class="badge bg-secondary ms-1" th:text="${#lists.size(cat.value)}"></span>
+                            </div>
+                            <ul>
+                                <li th:each="sc : ${cat.value}">
+                                    <div class="tree-node incident"
+                                         th:classappend="${sc.quaHan} ? 'overdue' : ''">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        <a th:href="@{/incidents/{id}(id=${sc.maSC})}"
+                                           th:text="${sc.maSC + ' – ' + sc.tieuDe}"></a>
+                                        <span class="badge ms-1"
+                                              th:classappend="'badge-' + ${sc.trangThai}"
+                                              th:text="${sc.trangThai}"></span>
+                                        <span class="badge bg-dark ms-1" th:text="${sc.mucDo}"></span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <p th:if="${tree.isEmpty()}" class="text-muted text-center py-4">Chưa có sự cố để hiển thị cây.</p>
+        </div>
+    </div>
+</section>
+<script th:inline="javascript">
+    const byProject = /*[[${byProject}]]*/ {};
+    const byCat = /*[[${byCat}]]*/ {};
+    new Chart(document.getElementById('chartProject'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(byProject),
+            datasets: [{ data: Object.values(byProject), backgroundColor: ['#3b82f6','#22c55e','#f59e0b','#ef4444','#8b5cf6','#06b6d4'] }]
+        },
+        options: { plugins: { legend: { position: 'bottom' } } }
+    });
+    new Chart(document.getElementById('chartCat'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(byCat),
+            datasets: [{ label: 'Số sự cố', data: Object.values(byCat), backgroundColor: '#38bdf8' }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+</script>
+</body>
+</html>

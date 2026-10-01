@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::section})}">
+<head><title>Trợ lý AI – Smart Campus</title></head>
+<body>
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-1"><i class="bi bi-robot text-info"></i> Trợ lý AI</h3>
+            <p class="text-muted mb-0 small">Gợi ý nguyên nhân, cách khắc phục &amp; phân loại sự cố</p>
+        </div>
+        <span class="badge rounded-pill px-3 py-2"
+              th:classappend="${online} ? 'bg-success' : 'bg-secondary'"
+              th:text="${aiStatus}">status</span>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card card-modern">
+                <div class="card-header"><i class="bi bi-lightbulb"></i> Gợi ý xử lý sự cố</div>
+                <div class="card-body">
+                    <form th:action="@{/ai/suggest}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Tiêu đề sự cố</label>
+                            <input class="form-control" name="tieuDe" required th:value="${tieuDe}"
+                                   placeholder="VD: Mất Wifi khu thư viện"/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả</label>
+                            <textarea class="form-control" name="moTa" rows="3" th:text="${moTa}"
+                                      placeholder="Chi tiết hiện tượng..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Danh mục (tuỳ chọn)</label>
+                            <select class="form-select" name="danhMuc">
+                                <option value="">-- Chọn --</option>
+                                <option th:each="c : ${categories}" th:value="${c.tenDM}" th:text="${c.tenDM}"
+                                        th:selected="${danhMuc == c.tenDM}"></option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary rounded-pill px-4" type="submit">
+                            <i class="bi bi-stars"></i> Phân tích AI
+                        </button>
+                    </form>
+                    <hr/>
+                    <form th:action="@{/ai/suggest-from-incident}" method="post" class="d-flex gap-2">
+                        <select class="form-select" name="maSC" required>
+                            <option value="">Chọn sự cố có sẵn...</option>
+                            <option th:each="s : ${incidents}" th:value="${s.maSC}"
+                                    th:text="${s.maSC + ' – ' + s.tieuDe}"
+                                    th:selected="${selectedMaSC == s.maSC}"></option>
+                        </select>
+                        <button class="btn btn-outline-primary rounded-pill text-nowrap" type="submit">Phân tích SC</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card card-modern mt-4">
+                <div class="card-header"><i class="bi bi-tags"></i> Gợi ý danh mục</div>
+                <div class="card-body">
+                    <form th:action="@{/ai/classify}" method="post">
+                        <div class="mb-3">
+                            <input class="form-control" name="tieuDe" required placeholder="Tiêu đề sự cố"
+                                   th:value="${tieuDe}"/>
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" name="moTa" rows="2" placeholder="Mô tả ngắn" th:text="${moTa}"></textarea>
+                        </div>
+                        <button class="btn btn-success rounded-pill px-4" type="submit">
+                            <i class="bi bi-magic"></i> Phân loại
+                        </button>
+                    </form>
+                    <div th:if="${classifyResult}" class="alert alert-success mt-3 mb-0 rounded-3">
+                        Gợi ý danh mục: <strong th:text="${classifyResult}"></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card card-modern h-100">
+                <div class="card-header"><i class="bi bi-chat-square-text"></i> Kết quả AI</div>
+                <div class="card-body">
+                    <div th:if="${result}" class="ai-result" th:text="${result}"></div>
+                    <div th:unless="${result}" class="text-muted text-center py-5">
+                        <i class="bi bi-robot" style="font-size:3rem;opacity:.3"></i>
+                        <p class="mt-2">Nhập sự cố và bấm Phân tích để xem gợi ý</p>
+                        <p class="small">Offline: gợi ý rule-based · Online: gọi API ngoài (OpenAI / Ollama…)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-modern mt-4">
+        <div class="card-header"><i class="bi bi-wifi"></i> Kết nối mạng ngoài (AI Online)</div>
+        <div class="card-body small">
+            <p>Mặc định <strong>offline</strong> (không cần mạng). Để gọi AI thật, sửa <code>application.properties</code>:</p>
+            <pre class="bg-light p-3 rounded-3 mb-0">app.ai.enabled=true
+app.ai.api-url=https://api.openai.com/v1/chat/completions
+app.ai.api-key=sk-your-key
+app.ai.model=gpt-4o-mini
+
+# Hoặc Ollama local (cần cài Ollama + model):
+# app.ai.api-url=http://localhost:11434/v1/chat/completions
+# app.ai.api-key=
+# app.ai.model=llama3.2</pre>
+        </div>
+    </div>
+</section>
+</body>
+</html>

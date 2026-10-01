@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::section})}">
+<title th:text="'Sự cố ' + ${incident.maSC}">Chi tiết</title>
+<section>
+    <div class="d-flex justify-content-between mb-3">
+        <h3>
+            <span th:text="${incident.maSC}"></span>
+            <span class="badge ms-2" th:classappend="'badge-' + ${incident.trangThai}" th:text="${incident.trangThai}"></span>
+            <span th:if="${incident.quaHan}" class="badge bg-danger">Quá hạn</span>
+        </h3>
+        <a th:href="@{/incidents}" class="btn btn-outline-secondary btn-sm">← Quay lại</a>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-3"><div class="card-body">
+                <h5 th:text="${incident.tieuDe}"></h5>
+                <p class="text-muted" th:text="${incident.moTa} ?: 'Không có mô tả'"></p>
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Dự án</dt><dd class="col-sm-9" th:text="${incident.duAn?.tenDA} ?: '—'"></dd>
+                    <dt class="col-sm-3">Công việc</dt><dd class="col-sm-9" th:text="${incident.congViec?.tenCV} ?: '—'"></dd>
+                    <dt class="col-sm-3">Mức độ</dt><dd class="col-sm-9" th:text="${incident.mucDo}"></dd>
+                    <dt class="col-sm-3">Người báo cáo</dt><dd class="col-sm-9" th:text="${incident.nguoiBaoCao?.hoTen}"></dd>
+                    <dt class="col-sm-3">Người xử lý</dt><dd class="col-sm-9" th:text="${incident.nguoiXuLy?.hoTen} ?: 'Chưa gán'"></dd>
+                    <dt class="col-sm-3">Ngày tạo</dt>
+                    <dd class="col-sm-9" th:text="${incident.ngayTao != null ? #temporals.format(incident.ngayTao, 'dd/MM/yyyy HH:mm') : ''}"></dd>
+                    <dt class="col-sm-3">Bắt đầu XL</dt>
+                    <dd class="col-sm-9" th:text="${incident.ngayBatDauXL != null ? #temporals.format(incident.ngayBatDauXL, 'dd/MM/yyyy HH:mm') : '—'}"></dd>
+                    <dt class="col-sm-3">Hạn xử lý</dt>
+                    <dd class="col-sm-9" th:text="${incident.hanXuLy != null ? #temporals.format(incident.hanXuLy, 'dd/MM/yyyy HH:mm') : '—'}"></dd>
+                    <dt class="col-sm-3">Kết thúc</dt>
+                    <dd class="col-sm-9" th:text="${incident.ngayKetThuc != null ? #temporals.format(incident.ngayKetThuc, 'dd/MM/yyyy HH:mm') : '—'}"></dd>
+                    <dt class="col-sm-3">Nguyên nhân</dt><dd class="col-sm-9" th:text="${incident.nguyenNhan} ?: '—'"></dd>
+                    <dt class="col-sm-3">Giải pháp</dt><dd class="col-sm-9" th:text="${incident.giaiPhap} ?: '—'"></dd>
+                    <dt class="col-sm-3">Kết quả</dt><dd class="col-sm-9" th:text="${incident.ketQua} ?: '—'"></dd>
+                </dl>
+            </div></div>
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">Lịch sử xử lý (Timeline)</div>
+                <div class="card-body">
+                    <div th:each="ls : ${timeline}" class="timeline-item">
+                        <div class="fw-semibold">
+                            <span th:text="${ls.trangThaiCu} ?: '—'"></span> → <span th:text="${ls.trangThaiMoi}"></span>
+                            <small class="text-muted ms-2" th:text="${ls.thoiGian != null ? #temporals.format(ls.thoiGian, 'dd/MM/yyyy HH:mm') : ''}"></small>
+                        </div>
+                        <div class="small text-muted" th:text="'Bởi: ' + ${ls.nguoiThucHien?.hoTen}"></div>
+                        <div th:if="${ls.ghiChu}" th:text="${ls.ghiChu}"></div>
+                        <div th:if="${ls.nguyenNhan}" class="small"><strong>NN:</strong> <span th:text="${ls.nguyenNhan}"></span></div>
+                        <div th:if="${ls.giaiPhap}" class="small"><strong>GP:</strong> <span th:text="${ls.giaiPhap}"></span></div>
+                    </div>
+                    <p th:if="${#lists.isEmpty(timeline)}" class="text-muted mb-0">Chưa có lịch sử</p>
+                </div>
+            </div>
+            <div class="card shadow-sm" th:if="${!#lists.isEmpty(similar)}">
+                <div class="card-header">Sự cố tương tự</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between" th:each="e : ${similar}">
+                        <a th:href="@{/incidents/{id}(id=${e.key.maSC})}" th:text="${e.key.maSC + ' — ' + e.key.tieuDe}"></a>
+                        <span class="badge bg-secondary" th:text="${e.value + ' từ khóa'}"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3" th:if="${currentUser != null and currentUser.admin}">
+                <div class="card-header">Gán người xử lý</div>
+                <div class="card-body">
+                    <form method="post" th:action="@{/incidents/{id}/assign(id=${incident.maSC})}">
+                        <select name="maNguoiXuLy" class="form-select mb-2" required>
+                            <option value="">-- Chọn USER --</option>
+                            <option th:each="u : ${handlers}" th:value="${u.maND}" th:text="${u.hoTen}"
+                                    th:selected="${incident.nguoiXuLy != null and incident.nguoiXuLy.maND == u.maND}"></option>
+                        </select>
+                        <button type="submit" class="btn btn-warning btn-sm w-100">Gán</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card shadow-sm" th:if="${!#lists.isEmpty(allowedNext)}">
+                <div class="card-header">Cập nhật trạng thái</div>
+                <div class="card-body">
+                    <form method="post" th:action="@{/incidents/{id}/update-status(id=${incident.maSC})}">
+                        <div class="mb-2">
+                            <label class="form-label small">Trạng thái mới</label>
+                            <select name="trangThaiMoi" class="form-select" required>
+                                <option th:each="t : ${allowedNext}" th:value="${t.name()}" th:text="${t.label}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-2"><label class="form-label small">Ghi chú</label>
+                            <textarea name="ghiChu" class="form-control" rows="2"></textarea></div>
+                        <div class="mb-2"><label class="form-label small">Nguyên nhân</label>
+                            <textarea name="nguyenNhan" class="form-control" rows="2"></textarea></div>
+                        <div class="mb-2"><label class="form-label small">Giải pháp</label>
+                            <textarea name="giaiPhap" class="form-control" rows="2"></textarea></div>
+                        <div class="mb-2"><label class="form-label small">Kết quả</label>
+                            <textarea name="ketQua" class="form-control" rows="2"></textarea></div>
+                        <button type="submit" class="btn btn-success btn-sm w-100">Cập nhật</button>
+                    </form>
+                </div>
+            </div>
+            <div class="alert alert-secondary mt-3" th:if="${#lists.isEmpty(allowedNext)}">
+                Sự cố đã đóng — không thể chuyển trạng thái.
+            </div>
+        </div>
+    </div>
+</section>
+</html>

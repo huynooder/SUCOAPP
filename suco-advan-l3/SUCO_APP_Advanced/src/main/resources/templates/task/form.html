@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::section})}">
+<title th:text="${task != null} ? 'Sửa công việc' : 'Thêm công việc'">Công việc</title>
+<section>
+    <h3 class="mb-4" th:text="${task != null} ? 'Sửa công việc' : 'Thêm công việc mới'"></h3>
+    <div class="card shadow-sm"><div class="card-body">
+        <form method="post" th:action="${task != null} ? @{/tasks/{id}/edit(id=${task.maCV})} : @{/tasks/create}">
+            <div class="mb-3" th:if="${task == null}">
+                <label class="form-label">Dự án *</label>
+                <select name="maDA" class="form-select" required>
+                    <option value="">-- Chọn dự án --</option>
+                    <option th:each="p : ${projects}" th:value="${p.maDA}" th:text="${p.tenDA}"></option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tên công việc *</label>
+                <input type="text" name="tenCV" class="form-control" required th:value="${task?.tenCV}"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mô tả</label>
+                <textarea name="moTa" class="form-control" rows="2" th:text="${task?.moTa}"></textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Người làm</label>
+                    <select name="maNguoiLam" class="form-select">
+                        <option value="">-- Chưa gán --</option>
+                        <option th:each="u : ${users}" th:value="${u.maND}" th:text="${u.hoTen}"
+                                th:selected="${task != null and task.nguoiLam != null and task.nguoiLam.maND == u.maND}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Mức độ</label>
+                    <select name="mucDo" class="form-select">
+                        <option th:each="m : ${mucDos}" th:value="${m}" th:text="${m}"
+                                th:selected="${task != null ? task.mucDo == m : m == 'TRUNG_BINH'}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select name="trangThai" class="form-select">
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
+                                th:selected="${task != null and task.trangThai == s}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Ngày bắt đầu</label>
+                    <input type="date" name="ngayBatDau" class="form-control" th:value="${task?.ngayBatDau}"/>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Ngày hết hạn</label>
+                    <input type="date" name="ngayHetHan" class="form-control" th:value="${task?.ngayHetHan}"/>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Lưu</button>
+            <a th:href="@{/tasks}" class="btn btn-outline-secondary">Hủy</a>
+        </form>
+    </div></div>
+</section>
+</html>
