@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::section})}">
+<title>Danh sách sự cố</title>
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3><i class="bi bi-exclamation-triangle"></i> Danh sách sự cố</h3>
+        <a th:href="@{/incidents/create}" class="btn btn-primary"><i class="bi bi-plus"></i> Tạo mới</a>
+    </div>
+    <form method="get" class="card card-body shadow-sm mb-3">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <input type="text" name="keyword" class="form-control" placeholder="Từ khóa..." th:value="${keyword}"/>
+            </div>
+            <div class="col-md-2">
+                <select name="maDA" class="form-select">
+                    <option value="">-- Dự án --</option>
+                    <option th:each="d : ${duAns}" th:value="${d.maDA}" th:text="${d.tenDA}"
+                            th:selected="${maDA != null and maDA == d.maDA}"></option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="trangThai" class="form-select">
+                    <option value="">-- Trạng thái --</option>
+                    <option th:each="t : ${trangThais}" th:value="${t.name()}" th:text="${t.label}"
+                            th:selected="${trangThai == t.name()}"></option>
+                </select>
+            </div>
+            <div class="col-md-2"><input type="date" name="from" class="form-control" th:value="${from}"/></div>
+            <div class="col-md-2"><input type="date" name="to" class="form-control" th:value="${to}"/></div>
+            <div class="col-md-1"><button type="submit" class="btn btn-outline-primary w-100">Lọc</button></div>
+        </div>
+    </form>
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                <tr><th>Mã</th><th>Tiêu đề</th><th>Dự án</th><th>Mức độ</th><th>Trạng thái</th>
+                    <th>Người XL</th><th>Hạn XL</th><th></th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="s : ${incidents}" th:classappend="${s.quaHan} ? 'overdue'">
+                    <td th:text="${s.maSC}"></td>
+                    <td>
+                        <span th:text="${s.tieuDe}"></span>
+                        <span th:if="${s.quaHan}" class="badge bg-danger ms-1">Quá hạn</span>
+                    </td>
+                    <td th:text="${s.duAn?.tenDA} ?: '—'"></td>
+                    <td th:text="${s.mucDo}"></td>
+                    <td><span class="badge" th:classappend="'badge-' + ${s.trangThai}" th:text="${s.trangThai}"></span></td>
+                    <td th:text="${s.nguoiXuLy?.hoTen} ?: '—'"></td>
+                    <td th:text="${s.hanXuLy != null ? #temporals.format(s.hanXuLy, 'dd/MM HH:mm') : ''}"></td>
+                    <td><a th:href="@{/incidents/{id}(id=${s.maSC})}" class="btn btn-sm btn-outline-primary">Chi tiết</a></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(incidents)}">
+                    <td colspan="8" class="text-center text-muted py-4">Không có sự cố nào</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+</html>

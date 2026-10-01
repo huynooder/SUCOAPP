@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::section})}">
+<title>Công việc</title>
+<section>
+    <div class="d-flex justify-content-between mb-3">
+        <h3><i class="bi bi-list-task"></i> Công việc</h3>
+        <a th:href="@{/tasks/create}" class="btn btn-primary"><i class="bi bi-plus"></i> Thêm công việc</a>
+    </div>
+    <form method="get" class="mb-3">
+        <div class="row g-2">
+            <div class="col-md-4">
+                <select name="maDA" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Tất cả dự án --</option>
+                    <option th:each="p : ${projects}" th:value="${p.maDA}" th:text="${p.tenDA}"
+                            th:selected="${maDA != null and maDA == p.maDA}"></option>
+                </select>
+            </div>
+        </div>
+    </form>
+    <div class="card shadow-sm">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+            <tr><th>ID</th><th>Tên CV</th><th>Dự án</th><th>Người làm</th><th>Mức độ</th><th>Trạng thái</th><th>Hết hạn</th><th></th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="t : ${tasks}">
+                <td th:text="${t.maCV}"></td>
+                <td th:text="${t.tenCV}"></td>
+                <td th:text="${t.duAn?.tenDA}"></td>
+                <td th:text="${t.nguoiLam?.hoTen} ?: '—'"></td>
+                <td th:text="${t.mucDo}"></td>
+                <td><span class="badge bg-secondary" th:text="${t.trangThai}"></span></td>
+                <td th:text="${t.ngayHetHan != null ? #temporals.format(t.ngayHetHan, 'dd/MM/yyyy') : ''}"></td>
+                <td><a th:href="@{/tasks/{id}/edit(id=${t.maCV})}" class="btn btn-sm btn-outline-primary">Sửa</a></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(tasks)}">
+                <td colspan="8" class="text-center text-muted py-4">Chưa có công việc</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+</html>

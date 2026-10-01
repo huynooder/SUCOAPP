@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: layout(~{::title}, ~{::section})}">
+<title>Dự án</title>
+<section>
+    <div class="d-flex justify-content-between mb-3">
+        <h3><i class="bi bi-folder"></i> Dự án</h3>
+        <a th:href="@{/projects/create}" class="btn btn-primary"><i class="bi bi-plus"></i> Thêm dự án</a>
+    </div>
+    <div class="card shadow-sm">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+            <tr><th>ID</th><th>Tên dự án</th><th>Trạng thái</th><th>Quản lý</th><th>Ngày bắt đầu</th><th></th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${projects}">
+                <td th:text="${p.maDA}"></td>
+                <td th:text="${p.tenDA}"></td>
+                <td><span class="badge bg-info" th:text="${p.trangThai}"></span></td>
+                <td th:text="${p.quanLy?.hoTen} ?: '—'"></td>
+                <td th:text="${p.ngayBatDau != null ? #temporals.format(p.ngayBatDau, 'dd/MM/yyyy') : ''}"></td>
+                <td><a th:href="@{/projects/{id}/edit(id=${p.maDA})}" class="btn btn-sm btn-outline-primary">Sửa</a>
+                    <a th:href="@{/tasks(maDA=${p.maDA})}" class="btn btn-sm btn-outline-secondary">Công việc</a></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(projects)}">
+                <td colspan="6" class="text-center text-muted py-4">Chưa có dự án</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+</html>
